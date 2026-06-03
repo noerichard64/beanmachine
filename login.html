@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bean Machine — Connexion</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --brown-deep: #1C1008;
+      --brown-dark: #2E1A0E;
+      --brown-mid: #3B2A1A;
+      --gold: #C9A84C;
+      --gold-light: #E2C47A;
+      --cream: #F5EDD8;
+      --text-light: #D4B896;
+      --text-muted: #8A6A4A;
+      --error: #C0392B;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--brown-deep);
+      color: var(--cream);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 60% at 50% 50%, rgba(92, 61, 30, 0.3) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .login-box {
+      background: var(--brown-dark);
+      border: 1px solid rgba(201, 168, 76, 0.15);
+      padding: 3rem 2.5rem;
+      width: 100%;
+      max-width: 400px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .login-logo {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .login-logo img {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      margin-bottom: 0.8rem;
+    }
+
+    .login-logo h1 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.6rem;
+      letter-spacing: 0.15em;
+      color: var(--gold);
+    }
+
+    .login-logo p {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .divider {
+      height: 1px;
+      background: rgba(201, 168, 76, 0.12);
+      margin: 1.5rem 0;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      margin-bottom: 1rem;
+    }
+
+    .form-group label {
+      font-size: 0.72rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .form-group input, .form-group select {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(201, 168, 76, 0.2);
+      color: var(--cream);
+      padding: 0.75rem 1rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      transition: border-color 0.2s;
+      outline: none;
+      width: 100%;
+    }
+
+    .form-group input:focus, .form-group select:focus {
+      border-color: var(--gold);
+    }
+
+    .form-group select option {
+      background: var(--brown-dark);
+    }
+
+    .btn-login {
+      background: var(--gold);
+      color: var(--brown-deep);
+      padding: 0.85rem;
+      border: none;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 500;
+      font-size: 0.9rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 0.5rem;
+      transition: background 0.2s;
+    }
+
+    .btn-login:hover { background: var(--gold-light); }
+
+    .error-msg {
+      color: var(--error);
+      font-size: 0.82rem;
+      margin-top: 0.75rem;
+      text-align: center;
+      display: none;
+    }
+
+    .back-link {
+      display: block;
+      text-align: center;
+      margin-top: 1.5rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .back-link:hover { color: var(--gold); }
+  </style>
+</head>
+<body>
+  <div class="login-box">
+    <div class="login-logo">
+      <img src="IMG_0304.PNG" alt="Bean Machine">
+      <h1>Bean Machine</h1>
+      <p>Espace Employé</p>
+    </div>
+    <div class="divider"></div>
+
+    <div class="form-group">
+      <label>Rôle</label>
+      <select id="role">
+        <option value="">Sélectionnez votre rôle</option>
+        <option value="employee">Employé</option>
+        <option value="manager">Manager</option>
+        <option value="admin">Administrateur</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Mot de passe</label>
+      <input type="password" id="password" placeholder="••••••••" onkeydown="if(event.key==='Enter') login()">
+    </div>
+
+    <button class="btn-login" onclick="login()">Connexion</button>
+    <div class="error-msg" id="errorMsg">Identifiants incorrects.</div>
+
+    <a href="index.html" class="back-link">← Retour au site</a>
+  </div>
+
+  <script>
+    // Default passwords — changeable from admin dashboard
+    const DEFAULT_PASSWORDS = {
+      employee: 'bm-employee',
+      manager: 'bm-manager',
+      admin: 'bm-admin'
+    };
+
+    function getPasswords() {
+      return JSON.parse(localStorage.getItem('bm_passwords') || JSON.stringify(DEFAULT_PASSWORDS));
+    }
+
+    function login() {
+      const role = document.getElementById('role').value;
+      const password = document.getElementById('password').value;
+      const passwords = getPasswords();
+
+      if (!role) {
+        document.getElementById('errorMsg').textContent = 'Veuillez sélectionner un rôle.';
+        document.getElementById('errorMsg').style.display = 'block';
+        return;
+      }
+
+      if (passwords[role] && password === passwords[role]) {
+        sessionStorage.setItem('bm_role', role);
+        window.location.href = 'dashboard.html';
+      } else {
+        document.getElementById('errorMsg').textContent = 'Mot de passe incorrect.';
+        document.getElementById('errorMsg').style.display = 'block';
+        document.getElementById('password').value = '';
+      }
+    }
+
+    // Redirect if already logged in
+    if (sessionStorage.getItem('bm_role')) {
+      window.location.href = 'dashboard.html';
+    }
+  </script>
+</body>
+</html>
